@@ -222,6 +222,7 @@ public class TodoCsvRepositoryTest {
      */
     private static void testFileCorruption() {
         TestRunner.startTest("파일 손상 처리");
+        cleanupTestFile();
         
         // 손상된 CSV 파일 생성
         try {
@@ -250,6 +251,7 @@ public class TodoCsvRepositoryTest {
      */
     private static void testConcurrentAccess() {
         TestRunner.startTest("동시 접근 시뮬레이션");
+        cleanupTestFile();
         
         TodoCsvRepository repo1 = new TodoCsvRepository(TEST_FILE);
         TodoCsvRepository repo2 = new TodoCsvRepository(TEST_FILE);

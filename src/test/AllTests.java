@@ -17,10 +17,10 @@ public class AllTests {
         System.out.println("----------------------------------------");
         TodoTest.main(args);
         
-        // TodoManager 테스트
-        System.out.println("\n📌 TodoManager 테스트");
+        // TodoService 테스트
+        System.out.println("\n📌 TodoService 테스트");
         System.out.println("----------------------------------------");
-        TodoManagerTest.main(args);
+        TodoServiceTest.main(args);
         
         // TodoCsvRepository 테스트
         System.out.println("\n📌 TodoCsvRepository 테스트");
