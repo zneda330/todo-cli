@@ -1,4 +1,8 @@
+package todo.ui;
+import todo.application.TodoManager;
+import todo.domain.Todo;
 import java.util.*;
+import java.time.LocalDate;
 
 public class BasicTodoUI implements ITodoUI {
     private Scanner scanner;
@@ -33,7 +37,8 @@ public class BasicTodoUI implements ITodoUI {
         System.out.println("1. ➕ Add Todo");
         System.out.println("2. 📃 View Todo List");
         System.out.println("3. 🔄 Toggle Todo Status");
-        System.out.println("4. 🚪 Exit Program");
+        System.out.println("4. ❌ Delete Todo");
+        System.out.println("5. 🚪 Exit Program");
         System.out.print("Choice: ");
     }
 
@@ -49,9 +54,12 @@ public class BasicTodoUI implements ITodoUI {
                 handleToggleTodo();
                 break;
             case "4":
+                handleDeleteTodo();
+                break;
+            case "5":
                 return true;
             default:
-                System.out.println("❌ Invalid choice. Please enter a number between 1-4.\n");
+                System.out.println("❌ Invalid choice. Please enter a number between 1-5.\n");
         }
         return false;
     }
@@ -65,7 +73,17 @@ public class BasicTodoUI implements ITodoUI {
         String title = scanner.nextLine();
         System.out.print("📝 Enter todo description: ");
         String todoDescription = scanner.nextLine();
-        TodoManager.getInstance().addTodo(title, todoDescription);
+        System.out.print("📅 Enter due date (YYYY-MM-DD) or leave blank: ");
+        String dueInput = scanner.nextLine();
+        LocalDate dueDate = null;
+        if (!dueInput.trim().isEmpty()) {
+            try {
+                dueDate = LocalDate.parse(dueInput.trim());
+            } catch (Exception e) {
+                System.out.println("Invalid date format. Ignoring due date.");
+            }
+        }
+        TodoManager.getInstance().addTodo(title, todoDescription, dueDate);
         System.out.println("🎉 Todo added successfully! 🎉");
         System.out.println("\nPress Enter to continue...");
         scanner.nextLine();
@@ -199,6 +217,38 @@ public class BasicTodoUI implements ITodoUI {
 
         TodoManager.getInstance().toggleTodo(todoIndex);
         System.out.println("🔄 Todo marked as incomplete! 🔄");
+        System.out.println("\nPress Enter to continue...");
+        scanner.nextLine();
+    }
+
+    private void handleDeleteTodo() {
+        clearScreen();
+        System.out.println("================================");
+        System.out.println("        ❌ DELETE TODO");
+        System.out.println("================================");
+
+        if (TodoManager.getInstance().getTodoCount() == 0) {
+            System.out.println("❌ No todos to delete!");
+            System.out.println("\nPress Enter to continue...");
+            scanner.nextLine();
+            return;
+        }
+
+        TodoManager.getInstance().displayTodos();
+        System.out.println("================================");
+        System.out.print("Enter todo number to delete: ");
+        int todoIndex = scanner.nextInt();
+        scanner.nextLine();
+
+        if (!TodoManager.getInstance().isValidIndex(todoIndex)) {
+            System.out.println("Please enter a valid number.");
+            System.out.println("\nPress Enter to continue...");
+            scanner.nextLine();
+            return;
+        }
+
+        TodoManager.getInstance().deleteTodo(todoIndex);
+        System.out.println("🎉 Todo deleted! 🎉");
         System.out.println("\nPress Enter to continue...");
         scanner.nextLine();
     }

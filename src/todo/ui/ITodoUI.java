@@ -1,3 +1,4 @@
+package todo.ui;
 public interface ITodoUI {
     void start();
     void displayWelcome();

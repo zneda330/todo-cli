@@ -1,4 +1,8 @@
+package todo.ui;
+import todo.application.TodoManager;
+import todo.domain.Todo;
 import java.util.*;
+import java.time.LocalDate;
 
 public class FancyTodoUI implements ITodoUI {
     private Scanner scanner;
@@ -81,12 +85,13 @@ public class FancyTodoUI implements ITodoUI {
         
         String[] menuItems = {
             "➕ 1. Add Todo",
-            "📋 2. View Todo List", 
+            "📋 2. View Todo List",
             "🔄 3. Toggle Todo Status",
-            "🚪 4. Exit Program"
+            "❌ 4. Delete Todo",
+            "🚪 5. Exit Program"
         };
-        
-        String[] colors = {GREEN, YELLOW, PURPLE, RED};
+
+        String[] colors = {GREEN, YELLOW, PURPLE, RED, RED};
         
         for (int i = 0; i < menuItems.length; i++) {
             String menuLine = createLeftAlignedLine("║", menuItems[i], "║", width, 4);
@@ -95,7 +100,7 @@ public class FancyTodoUI implements ITodoUI {
         
         System.out.println(BOLD + BLUE + emptyLine + RESET);
         System.out.println(BOLD + BLUE + bottomBorder + RESET);
-        System.out.print(BOLD + CYAN + "✨ Choose (1-4): " + RESET);
+        System.out.print(BOLD + CYAN + "✨ Choose (1-5): " + RESET);
     }
 
     private boolean handleChoice(String choice) {
@@ -110,9 +115,12 @@ public class FancyTodoUI implements ITodoUI {
                 handleToggleTodo();
                 break;
             case "4":
+                handleDeleteTodo();
+                break;
+            case "5":
                 return true;
             default:
-                System.out.println(RED + "❌ Invalid choice! Please enter 1-4." + RESET);
+                System.out.println(RED + "❌ Invalid choice! Please enter 1-5." + RESET);
                 pause();
         }
         return false;
@@ -135,7 +143,17 @@ public class FancyTodoUI implements ITodoUI {
         String titleInput = scanner.nextLine();
         System.out.print(BOLD + YELLOW + "📝 Enter description: " + RESET);
         String todoDescription = scanner.nextLine();
-        TodoManager.getInstance().addTodo(titleInput, todoDescription);
+        System.out.print(BOLD + YELLOW + "📅 Enter due date (YYYY-MM-DD) or leave blank: " + RESET);
+        String dueInput = scanner.nextLine();
+        LocalDate dueDate = null;
+        if (!dueInput.trim().isEmpty()) {
+            try {
+                dueDate = LocalDate.parse(dueInput.trim());
+            } catch (Exception e) {
+                System.out.println(BOLD + RED + "Invalid date format. Ignoring due date." + RESET);
+            }
+        }
+        TodoManager.getInstance().addTodo(titleInput, todoDescription, dueDate);
         System.out.println(BOLD + GREEN + "🎉 Todo added successfully! 🎉" + RESET);
         pause();
     }
@@ -297,6 +315,35 @@ public class FancyTodoUI implements ITodoUI {
 
         TodoManager.getInstance().toggleTodo(todoIndex);
         System.out.println(BOLD + PURPLE + "🔄 Todo marked as incomplete! 🔄" + RESET);
+        pause();
+    }
+
+    private void handleDeleteTodo() {
+        clearScreen();
+        int width = getTerminalWidth();
+        String titleLine = createCenteredLine("", "❌ DELETE TODO ❌", "", width);
+        System.out.println(BOLD + RED + titleLine + RESET);
+
+        if (TodoManager.getInstance().getTodoCount() == 0) {
+            System.out.println(BOLD + RED + "No todos to delete!" + RESET);
+            pause();
+            return;
+        }
+
+        displayFormattedTodos(width);
+        System.out.println();
+        System.out.print(BOLD + YELLOW + "Enter todo number to delete: " + RESET);
+        int todoIndex = scanner.nextInt();
+        scanner.nextLine();
+
+        if (!TodoManager.getInstance().isValidIndex(todoIndex)) {
+            System.out.println(BOLD + RED + "❌ Please enter a valid number!" + RESET);
+            pause();
+            return;
+        }
+
+        TodoManager.getInstance().deleteTodo(todoIndex);
+        System.out.println(BOLD + GREEN + "🎉 Todo deleted! 🎉" + RESET);
         pause();
     }
 

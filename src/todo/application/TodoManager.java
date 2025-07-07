@@ -1,7 +1,12 @@
+package todo.application;
+import todo.domain.Todo;
+import todo.domain.TodoFilter;
+import todo.domain.TodoRepository;
+import todo.infrastructure.TodoCsvRepository;
 import java.util.*;
+import java.time.LocalDate;
 
 // Repository for persistence
-// (TodoCsvRepository lives in the default package)
 
 
 public class TodoManager {
@@ -24,15 +29,19 @@ public class TodoManager {
 
     // Backwards compatibility method
     public void addTodo(String description) {
-        addTodo(description, "", new HashMap<>());
+        addTodo(description, "", null, new HashMap<>());
     }
 
     public void addTodo(String title, String description) {
-        addTodo(title, description, new HashMap<>());
+        addTodo(title, description, null, new HashMap<>());
     }
 
-    public void addTodo(String title, String description, Map<String, String> metadata) {
-        Todo todo = new Todo(title, description, metadata);
+    public void addTodo(String title, String description, LocalDate dueDate) {
+        addTodo(title, description, dueDate, new HashMap<>());
+    }
+
+    public void addTodo(String title, String description, LocalDate dueDate, Map<String, String> metadata) {
+        Todo todo = new Todo(title, description, dueDate, metadata);
         todos.add(todo);
         repository.save(todos);
     }
@@ -116,6 +125,13 @@ public class TodoManager {
         if (index >= 0 && index < todos.size()) {
             Todo todo = todos.get(index);
             todo.setCompleted(!todo.isCompleted());
+            repository.save(todos);
+        }
+    }
+
+    public void deleteTodo(int index) {
+        if (index >= 0 && index < todos.size()) {
+            todos.remove(index);
             repository.save(todos);
         }
     }
