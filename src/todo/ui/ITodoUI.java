@@ -3,8 +3,8 @@ package todo.ui;
 /**
  * Todo 사용자 인터페이스의 공통 계약을 정의하는 인터페이스
  * 
- * 이 인터페이스를 구현하여 다양한 스타일의 UI를 만들 수 있습니다.
- * (예: 기본 텍스트 UI, 화려한 컬러 UI 등)
+ * UI는 사용자와의 상호작용을 담당하고, Service를 통해 비즈니스 로직을 처리합니다.
+ * Controller 없이 UI → Service → Repository 구조를 따릅니다.
  */
 public interface ITodoUI {
     /**

@@ -1,5 +1,5 @@
 package todo.ui;
-import todo.application.TodoManager;
+import todo.application.TodoService;
 import todo.domain.Todo;
 import java.util.*;
 import java.time.LocalDate;
@@ -10,7 +10,8 @@ import java.time.LocalDate;
  * ANSI 이스케이프 코드를 사용하여 터미널에 색상과 스타일을 적용합니다.
  */
 public class FancyTodoUI implements ITodoUI {
-    private Scanner scanner;
+    private final TodoService todoService;
+    private final Scanner scanner;
     
     // ANSI 색상 코드 상수들
     private static final String RESET = "\033[0m";    // 색상 초기화
@@ -26,9 +27,10 @@ public class FancyTodoUI implements ITodoUI {
 
     /**
      * FancyTodoUI 생성자
-     * Scanner 객체를 초기화하여 사용자 입력을 받을 준비를 합니다.
+     * @param todoService 비즈니스 로직을 처리할 서비스
      */
-    public FancyTodoUI() {
+    public FancyTodoUI(TodoService todoService) {
+        this.todoService = todoService;
         this.scanner = new Scanner(System.in);
     }
 
@@ -164,7 +166,7 @@ public class FancyTodoUI implements ITodoUI {
                 System.out.println(BOLD + RED + "Invalid date format. Ignoring due date." + RESET);
             }
         }
-        TodoManager.getInstance().addTodo(titleInput, todoDescription, dueDate);
+        todoService.addTodo(titleInput, todoDescription, dueDate);
         System.out.println(BOLD + GREEN + "🎉 Todo added successfully! 🎉" + RESET);
         pause();
     }
@@ -184,7 +186,7 @@ public class FancyTodoUI implements ITodoUI {
         System.out.println(BOLD + YELLOW + bottomBorder + RESET);
         System.out.println();
         
-        if (TodoManager.getInstance().getTodoCount() == 0) {
+        if (todoService.getTodoCount() == 0) {
             System.out.println(BOLD + CYAN + "🌟 No todos yet! Add some new ones! 🌟" + RESET);
         } else {
             displayFormattedTodos(width);
@@ -207,7 +209,7 @@ public class FancyTodoUI implements ITodoUI {
         
         System.out.println(BOLD + PURPLE + bottomBorder + RESET);
         
-        if (TodoManager.getInstance().getTodoCount() == 0) {
+        if (todoService.getTodoCount() == 0) {
             System.out.println(BOLD + RED + "❌ No todos available!" + RESET);
             pause();
             return;
@@ -254,7 +256,7 @@ public class FancyTodoUI implements ITodoUI {
     }
     
     private void handleIncompleteToggle(int width) {
-        if (!TodoManager.getInstance().hasIncompleteTodos()) {
+        if (todoService.getIncompleteTodos().isEmpty()) {
             System.out.println(BOLD + GREEN + "🎉 All todos are completed! Great job! 🎉" + RESET);
             pause();
             return;
@@ -273,26 +275,26 @@ public class FancyTodoUI implements ITodoUI {
         int todoIndex = scanner.nextInt();
         scanner.nextLine();
 
-        if (!TodoManager.getInstance().isValidIndex(todoIndex)) {
+        if (todoIndex < 0 || todoIndex >= todoService.getTodoCount()) {
             System.out.println(BOLD + RED + "❌ Please enter a valid number!" + RESET);
             pause();
             return;
         }
         
-        Todo todo = TodoManager.getInstance().getTodoAt(todoIndex);
+        Todo todo = todoService.getTodoAt(todoIndex);
         if (todo != null && todo.isCompleted()) {
             System.out.println(BOLD + RED + "❌ This todo is already completed!" + RESET);
             pause();
             return;
         }
 
-        TodoManager.getInstance().toggleTodo(todoIndex);
+        todoService.toggleTodo(todoIndex);
         System.out.println(BOLD + GREEN + "🎉 Todo marked as completed! 🎉" + RESET);
         pause();
     }
     
     private void handleCompletedToggle(int width) {
-        if (!TodoManager.getInstance().hasCompletedTodos()) {
+        if (todoService.getCompletedTodos().isEmpty()) {
             System.out.println(BOLD + CYAN + "🔔 No completed todos yet! Start completing some! 🔔" + RESET);
             pause();
             return;
@@ -311,20 +313,20 @@ public class FancyTodoUI implements ITodoUI {
         int todoIndex = scanner.nextInt();
         scanner.nextLine();
 
-        if (!TodoManager.getInstance().isValidIndex(todoIndex)) {
+        if (todoIndex < 0 || todoIndex >= todoService.getTodoCount()) {
             System.out.println(BOLD + RED + "❌ Please enter a valid number!" + RESET);
             pause();
             return;
         }
         
-        Todo todo = TodoManager.getInstance().getTodoAt(todoIndex);
+        Todo todo = todoService.getTodoAt(todoIndex);
         if (todo != null && !todo.isCompleted()) {
             System.out.println(BOLD + RED + "❌ This todo is already incomplete!" + RESET);
             pause();
             return;
         }
 
-        TodoManager.getInstance().toggleTodo(todoIndex);
+        todoService.toggleTodo(todoIndex);
         System.out.println(BOLD + PURPLE + "🔄 Todo marked as incomplete! 🔄" + RESET);
         pause();
     }
@@ -335,7 +337,7 @@ public class FancyTodoUI implements ITodoUI {
         String titleLine = createCenteredLine("", "❌ DELETE TODO ❌", "", width);
         System.out.println(BOLD + RED + titleLine + RESET);
 
-        if (TodoManager.getInstance().getTodoCount() == 0) {
+        if (todoService.getTodoCount() == 0) {
             System.out.println(BOLD + RED + "No todos to delete!" + RESET);
             pause();
             return;
@@ -347,13 +349,13 @@ public class FancyTodoUI implements ITodoUI {
         int todoIndex = scanner.nextInt();
         scanner.nextLine();
 
-        if (!TodoManager.getInstance().isValidIndex(todoIndex)) {
+        if (todoIndex < 0 || todoIndex >= todoService.getTodoCount()) {
             System.out.println(BOLD + RED + "❌ Please enter a valid number!" + RESET);
             pause();
             return;
         }
 
-        TodoManager.getInstance().deleteTodo(todoIndex);
+        todoService.deleteTodo(todoIndex);
         System.out.println(BOLD + GREEN + "🎉 Todo deleted! 🎉" + RESET);
         pause();
     }
@@ -386,19 +388,19 @@ public class FancyTodoUI implements ITodoUI {
     }
 
     private void displayFormattedTodos(int width) {
-        TodoManager manager = TodoManager.getInstance();
+        List<Todo> todos = todoService.getAllTodos();
         String topBorder = createBorder("╔", "═", "╗", width);
         String bottomBorder = createBorder("╚", "═", "╝", width);
         String middleBorder = createBorder("╠", "═", "╣", width);
         
         System.out.println(BOLD + GREEN + topBorder + RESET);
         
-        for (int i = 0; i < manager.getTodoCount(); i++) {
-            String todoText = String.format("[%2d] %s", i, getTodoAt(i));
+        for (int i = 0; i < todos.size(); i++) {
+            String todoText = String.format("[%2d] %s", i, todos.get(i).toString());
             String todoLine = createLeftAlignedLine("║", todoText, "║", width, 2);
             System.out.println(BOLD + GREEN + "║" + todoLine.substring(1, todoLine.length() - 1) + "║" + RESET);
             
-            if (i < manager.getTodoCount() - 1) {
+            if (i < todos.size() - 1) {
                 System.out.println(BOLD + GREEN + middleBorder + RESET);
             }
         }
@@ -407,7 +409,7 @@ public class FancyTodoUI implements ITodoUI {
     }
     
     private void displayFormattedIncompleteTodos(int width) {
-        TodoManager manager = TodoManager.getInstance();
+        List<Todo> allTodos = todoService.getAllTodos();
         String topBorder = createBorder("╔", "═", "╗", width);
         String bottomBorder = createBorder("╚", "═", "╝", width);
         String middleBorder = createBorder("╠", "═", "╣", width);
@@ -417,9 +419,9 @@ public class FancyTodoUI implements ITodoUI {
         boolean hasIncomplete = false;
         boolean firstItem = true;
         
-        for (int i = 0; i < manager.getTodoCount(); i++) {
-            Todo todo = manager.getTodoAt(i);
-            if (todo != null && !todo.isCompleted()) {
+        for (int i = 0; i < allTodos.size(); i++) {
+            Todo todo = allTodos.get(i);
+            if (!todo.isCompleted()) {
                 if (!firstItem) {
                     System.out.println(BOLD + GREEN + middleBorder + RESET);
                 }
@@ -441,7 +443,7 @@ public class FancyTodoUI implements ITodoUI {
     }
     
     private void displayFormattedCompletedTodos(int width) {
-        TodoManager manager = TodoManager.getInstance();
+        List<Todo> allTodos = todoService.getAllTodos();
         String topBorder = createBorder("╔", "═", "╗", width);
         String bottomBorder = createBorder("╚", "═", "╝", width);
         String middleBorder = createBorder("╠", "═", "╣", width);
@@ -451,9 +453,9 @@ public class FancyTodoUI implements ITodoUI {
         boolean hasCompleted = false;
         boolean firstItem = true;
         
-        for (int i = 0; i < manager.getTodoCount(); i++) {
-            Todo todo = manager.getTodoAt(i);
-            if (todo != null && todo.isCompleted()) {
+        for (int i = 0; i < allTodos.size(); i++) {
+            Todo todo = allTodos.get(i);
+            if (todo.isCompleted()) {
                 if (!firstItem) {
                     System.out.println(BOLD + GREEN + middleBorder + RESET);
                 }
@@ -475,9 +477,9 @@ public class FancyTodoUI implements ITodoUI {
     }
     
     private String getTodoAt(int index) {
-        TodoManager manager = TodoManager.getInstance();
-        if (index >= 0 && index < manager.getTodoCount()) {
-            return manager.getTodoAt(index).toString();
+        Todo todo = todoService.getTodoAt(index);
+        if (todo != null) {
+            return todo.toString();
         }
         return "";
     }

@@ -1,5 +1,5 @@
 package todo.ui;
-import todo.application.TodoManager;
+import todo.application.TodoService;
 import todo.domain.Todo;
 import java.util.*;
 import java.time.LocalDate;
@@ -10,13 +10,15 @@ import java.time.LocalDate;
  * 이모지를 사용하여 시각적으로 친근한 UI를 구성합니다.
  */
 public class BasicTodoUI implements ITodoUI {
-    private Scanner scanner;
+    private final TodoService todoService;
+    private final Scanner scanner;
 
     /**
      * BasicTodoUI 생성자
-     * Scanner 객체를 초기화하여 사용자 입력을 받을 준비를 합니다.
+     * @param todoService 비즈니스 로직을 처리할 서비스
      */
-    public BasicTodoUI() {
+    public BasicTodoUI(TodoService todoService) {
+        this.todoService = todoService;
         this.scanner = new Scanner(System.in);
     }
 
@@ -112,10 +114,19 @@ public class BasicTodoUI implements ITodoUI {
                 System.out.println("Invalid date format. Ignoring due date.");
             }
         }
-        TodoManager.getInstance().addTodo(title, todoDescription, dueDate);
+        todoService.addTodo(title, todoDescription, dueDate);
         System.out.println("🎉 Todo added successfully! 🎉");
         System.out.println("\nPress Enter to continue...");
         scanner.nextLine();
+    }
+    
+    /**
+     * Todo 목록을 화면에 표시하는 헬퍼 메서드
+     */
+    private void displayTodoList(List<Todo> todos) {
+        for (int i = 0; i < todos.size(); i++) {
+            System.out.printf("[%2d] %s%n", i, todos.get(i));
+        }
     }
 
     /**
@@ -128,10 +139,10 @@ public class BasicTodoUI implements ITodoUI {
         System.out.println("        📃 TODO LIST");
         System.out.println("================================");
         
-        if (TodoManager.getInstance().getTodoCount() == 0) {
+        if (todoService.getTodoCount() == 0) {
             System.out.println("🌟 No todos yet! Add some new ones! 🌟");
         } else {
-            TodoManager.getInstance().displayTodos();
+            displayTodoList(todoService.getAllTodos());
         }
         
         System.out.println("\nPress Enter to continue...");
@@ -148,7 +159,7 @@ public class BasicTodoUI implements ITodoUI {
         System.out.println("      🔄 TOGGLE TODO STATUS");
         System.out.println("================================");
         
-        if (TodoManager.getInstance().getTodoCount() == 0) {
+        if (todoService.getTodoCount() == 0) {
             System.out.println("❌ No todos available!");
             System.out.println("\nPress Enter to continue...");
             scanner.nextLine();
@@ -186,28 +197,28 @@ public class BasicTodoUI implements ITodoUI {
         System.out.println("       ❌ INCOMPLETE TODOS");
         System.out.println("================================");
         
-        if (!TodoManager.getInstance().hasIncompleteTodos()) {
+        if (todoService.getIncompleteTodos().isEmpty()) {
             System.out.println("🎉 All todos are completed! Great job! 🎉");
             System.out.println("\nPress Enter to continue...");
             scanner.nextLine();
             return;
         }
         
-        TodoManager.getInstance().displayIncompleteTodos();
+        displayTodoList(todoService.getIncompleteTodos());
         System.out.println("================================");
         
         System.out.println("Which todo would you like to mark as complete?");
         int todoIndex = scanner.nextInt();
         scanner.nextLine();
 
-        if (!TodoManager.getInstance().isValidIndex(todoIndex)) {
+        if (todoIndex < 0 || todoIndex >= todoService.getTodoCount()) {
             System.out.println("Please enter a valid number.");
             System.out.println("\nPress Enter to continue...");
             scanner.nextLine();
             return;
         }
         
-        Todo todo = TodoManager.getInstance().getTodoAt(todoIndex);
+        Todo todo = todoService.getTodoAt(todoIndex);
         if (todo != null && todo.isCompleted()) {
             System.out.println("❌ This todo is already completed!");
             System.out.println("\nPress Enter to continue...");
@@ -215,7 +226,7 @@ public class BasicTodoUI implements ITodoUI {
             return;
         }
 
-        TodoManager.getInstance().toggleTodo(todoIndex);
+        todoService.toggleTodo(todoIndex);
         System.out.println("🎉 Todo marked as completed! 🎉");
         System.out.println("\nPress Enter to continue...");
         scanner.nextLine();
@@ -231,28 +242,28 @@ public class BasicTodoUI implements ITodoUI {
         System.out.println("        ✅ COMPLETED TODOS");
         System.out.println("================================");
         
-        if (!TodoManager.getInstance().hasCompletedTodos()) {
+        if (todoService.getCompletedTodos().isEmpty()) {
             System.out.println("🔔 No completed todos yet! Start completing some! 🔔");
             System.out.println("\nPress Enter to continue...");
             scanner.nextLine();
             return;
         }
         
-        TodoManager.getInstance().displayCompletedTodos();
+        displayTodoList(todoService.getCompletedTodos());
         System.out.println("================================");
         
         System.out.println("Which todo would you like to mark as incomplete?");
         int todoIndex = scanner.nextInt();
         scanner.nextLine();
 
-        if (!TodoManager.getInstance().isValidIndex(todoIndex)) {
+        if (todoIndex < 0 || todoIndex >= todoService.getTodoCount()) {
             System.out.println("Please enter a valid number.");
             System.out.println("\nPress Enter to continue...");
             scanner.nextLine();
             return;
         }
         
-        Todo todo = TodoManager.getInstance().getTodoAt(todoIndex);
+        Todo todo = todoService.getTodoAt(todoIndex);
         if (todo != null && !todo.isCompleted()) {
             System.out.println("❌ This todo is already incomplete!");
             System.out.println("\nPress Enter to continue...");
@@ -260,7 +271,7 @@ public class BasicTodoUI implements ITodoUI {
             return;
         }
 
-        TodoManager.getInstance().toggleTodo(todoIndex);
+        todoService.toggleTodo(todoIndex);
         System.out.println("🔄 Todo marked as incomplete! 🔄");
         System.out.println("\nPress Enter to continue...");
         scanner.nextLine();
@@ -276,27 +287,27 @@ public class BasicTodoUI implements ITodoUI {
         System.out.println("        ❌ DELETE TODO");
         System.out.println("================================");
 
-        if (TodoManager.getInstance().getTodoCount() == 0) {
+        if (todoService.getTodoCount() == 0) {
             System.out.println("❌ No todos to delete!");
             System.out.println("\nPress Enter to continue...");
             scanner.nextLine();
             return;
         }
 
-        TodoManager.getInstance().displayTodos();
+        displayTodoList(todoService.getAllTodos());
         System.out.println("================================");
         System.out.print("Enter todo number to delete: ");
         int todoIndex = scanner.nextInt();
         scanner.nextLine();
 
-        if (!TodoManager.getInstance().isValidIndex(todoIndex)) {
+        if (todoIndex < 0 || todoIndex >= todoService.getTodoCount()) {
             System.out.println("Please enter a valid number.");
             System.out.println("\nPress Enter to continue...");
             scanner.nextLine();
             return;
         }
 
-        TodoManager.getInstance().deleteTodo(todoIndex);
+        todoService.deleteTodo(todoIndex);
         System.out.println("🎉 Todo deleted! 🎉");
         System.out.println("\nPress Enter to continue...");
         scanner.nextLine();
