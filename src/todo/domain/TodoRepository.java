@@ -34,4 +34,11 @@ public interface TodoRepository {
      * @param todos 저장할 Todo 목록
      */
     void save(List<Todo> todos);
+    
+    /**
+     * 단일 Todo를 저장소에 추가
+     * 기존 Todo 목록에 새로운 Todo를 추가하여 저장합니다.
+     * @param todo 추가할 Todo 항목
+     */
+    void save(Todo todo);
 }

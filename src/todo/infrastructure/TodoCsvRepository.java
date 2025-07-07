@@ -153,4 +153,18 @@ public class TodoCsvRepository implements TodoRepository {
         }
         return text;
     }
+    
+    /**
+     * 단일 Todo를 저장소에 추가
+     * 기존 Todo 목록을 읽고, 새 Todo를 추가한 후 전체를 다시 저장합니다.
+     * @param todo 추가할 Todo 항목
+     */
+    public void save(Todo todo) {
+        // 기존 Todo 목록을 읽어옴
+        List<Todo> todos = load();
+        // 새 Todo 추가
+        todos.add(todo);
+        // 전체 목록을 다시 저장
+        save(todos);
+    }
 }

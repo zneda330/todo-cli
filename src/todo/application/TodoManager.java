@@ -75,7 +75,7 @@ public class TodoManager {
     public void addTodo(String title, String description, LocalDate dueDate, Map<String, String> metadata) {
         Todo todo = new Todo(title, description, dueDate, metadata);
         todos.add(todo);
-        repository.save(todos);  // 저장소에 저장
+        repository.save(todo);  // 단일 Todo를 저장 (내부적으로 기존 목록에 추가)
     }
 
     /**
