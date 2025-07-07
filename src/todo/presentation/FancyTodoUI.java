@@ -1,4 +1,4 @@
-package todo.ui;
+package todo.presentation;
 import todo.application.TodoService;
 import todo.domain.Todo;
 import java.util.*;

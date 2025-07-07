@@ -1,4 +1,4 @@
-package todo.ui;
+package todo.presentation;
 
 /**
  * Todo 사용자 인터페이스의 공통 계약을 정의하는 인터페이스
