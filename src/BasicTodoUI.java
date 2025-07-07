@@ -61,9 +61,11 @@ public class BasicTodoUI implements ITodoUI {
         System.out.println("================================");
         System.out.println("        ➕ ADD NEW TODO");
         System.out.println("================================");
-        System.out.print("📝 Enter a new todo: ");
+        System.out.print("📝 Enter todo title: ");
+        String title = scanner.nextLine();
+        System.out.print("📝 Enter todo description: ");
         String todoDescription = scanner.nextLine();
-        TodoManager.getInstance().addTodo(todoDescription);
+        TodoManager.getInstance().addTodo(title, todoDescription);
         System.out.println("🎉 Todo added successfully! 🎉");
         System.out.println("\nPress Enter to continue...");
         scanner.nextLine();
