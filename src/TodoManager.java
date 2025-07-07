@@ -1,11 +1,18 @@
 import java.util.*;
 
+// Repository for persistence
+// (TodoCsvRepository lives in the default package)
+
+
 public class TodoManager {
     private static TodoManager instance;
     private ArrayList<Todo> todos;
+    private TodoRepository repository;
 
     private TodoManager() {
+        this.repository = new TodoCsvRepository("todos.csv");
         this.todos = new ArrayList<>();
+        this.todos.addAll(repository.load());
     }
 
     public static TodoManager getInstance() {
@@ -15,14 +22,25 @@ public class TodoManager {
         return instance;
     }
 
+    // Backwards compatibility method
     public void addTodo(String description) {
-        Todo todo = new Todo(description);
+        addTodo(description, "", new HashMap<>());
+    }
+
+    public void addTodo(String title, String description) {
+        addTodo(title, description, new HashMap<>());
+    }
+
+    public void addTodo(String title, String description, Map<String, String> metadata) {
+        Todo todo = new Todo(title, description, metadata);
         todos.add(todo);
+        repository.save(todos);
     }
 
     public void displayTodos() {
-        for (int i = 0; i < todos.size(); i++) {
-            Todo todo = todos.get(i);
+        List<Todo> list = fetchTodos(TodoFilter.ALL);
+        for (int i = 0; i < list.size(); i++) {
+            Todo todo = list.get(i);
             System.out.printf("[%2d] %s%n", i, todo);
         }
     }
@@ -31,6 +49,7 @@ public class TodoManager {
         if (index >= 0 && index < todos.size()) {
             Todo todo = todos.get(index);
             todo.setCompleted(true);
+            repository.save(todos);
         }
     }
 
@@ -48,57 +67,56 @@ public class TodoManager {
         }
         return null;
     }
+
+    /**
+     * Load todos from repository using a filter.
+     */
+    public List<Todo> fetchTodos(TodoFilter filter) {
+        return repository.load(filter);
+    }
+
+    /**
+     * Retrieve a todo directly from the repository by index.
+     */
+    public Todo fetchTodo(int index) {
+        return repository.get(index);
+    }
     
     public void displayIncompleteTodos() {
-        int count = 0;
-        for (int i = 0; i < todos.size(); i++) {
-            Todo todo = todos.get(i);
-            if (!todo.isCompleted()) {
-                System.out.printf("[%2d] %s%n", i, todo);
-                count++;
-            }
+        List<Todo> list = fetchTodos(TodoFilter.INCOMPLETE);
+        for (int i = 0; i < list.size(); i++) {
+            Todo todo = list.get(i);
+            System.out.printf("[%2d] %s%n", i, todo);
         }
-        if (count == 0) {
+        if (list.isEmpty()) {
             System.out.println("🎉 All todos are completed! Great job! 🎉");
         }
     }
     
     public boolean hasIncompleteTodos() {
-        for (Todo todo : todos) {
-            if (!todo.isCompleted()) {
-                return true;
-            }
-        }
-        return false;
+        return !fetchTodos(TodoFilter.INCOMPLETE).isEmpty();
     }
     
     public void displayCompletedTodos() {
-        int count = 0;
-        for (int i = 0; i < todos.size(); i++) {
-            Todo todo = todos.get(i);
-            if (todo.isCompleted()) {
-                System.out.printf("[%2d] %s%n", i, todo);
-                count++;
-            }
+        List<Todo> list = fetchTodos(TodoFilter.COMPLETED);
+        for (int i = 0; i < list.size(); i++) {
+            Todo todo = list.get(i);
+            System.out.printf("[%2d] %s%n", i, todo);
         }
-        if (count == 0) {
+        if (list.isEmpty()) {
             System.out.println("🔔 No completed todos yet! Start completing some! 🔔");
         }
     }
     
     public boolean hasCompletedTodos() {
-        for (Todo todo : todos) {
-            if (todo.isCompleted()) {
-                return true;
-            }
-        }
-        return false;
+        return !fetchTodos(TodoFilter.COMPLETED).isEmpty();
     }
     
     public void toggleTodo(int index) {
         if (index >= 0 && index < todos.size()) {
             Todo todo = todos.get(index);
             todo.setCompleted(!todo.isCompleted());
+            repository.save(todos);
         }
     }
 }

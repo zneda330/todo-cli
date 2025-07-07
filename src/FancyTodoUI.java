@@ -131,9 +131,11 @@ public class FancyTodoUI implements ITodoUI {
         System.out.println(BOLD + GREEN + "║" + titleLine.substring(1, titleLine.length() - 1) + "║" + RESET);
         
         System.out.println(BOLD + GREEN + bottomBorder + RESET);
-        System.out.print(BOLD + YELLOW + "✨ Enter your new todo: " + RESET);
+        System.out.print(BOLD + YELLOW + "✨ Enter todo title: " + RESET);
+        String titleInput = scanner.nextLine();
+        System.out.print(BOLD + YELLOW + "📝 Enter description: " + RESET);
         String todoDescription = scanner.nextLine();
-        TodoManager.getInstance().addTodo(todoDescription);
+        TodoManager.getInstance().addTodo(titleInput, todoDescription);
         System.out.println(BOLD + GREEN + "🎉 Todo added successfully! 🎉" + RESET);
         pause();
     }
