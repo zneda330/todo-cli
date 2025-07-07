@@ -4,13 +4,26 @@ import todo.domain.Todo;
 import java.util.*;
 import java.time.LocalDate;
 
+/**
+ * 기본 Todo UI 구현 클래스
+ * 간단한 텍스트 기반의 사용자 인터페이스를 제공합니다.
+ * 이모지를 사용하여 시각적으로 친근한 UI를 구성합니다.
+ */
 public class BasicTodoUI implements ITodoUI {
     private Scanner scanner;
 
+    /**
+     * BasicTodoUI 생성자
+     * Scanner 객체를 초기화하여 사용자 입력을 받을 준비를 합니다.
+     */
     public BasicTodoUI() {
         this.scanner = new Scanner(System.in);
     }
 
+    /**
+     * Todo 애플리케이션을 시작합니다.
+     * 환영 메시지를 표시하고, 메뉴를 통해 사용자와 상호작용한 후 종료 메시지를 표시합니다.
+     */
     public void start() {
         displayWelcome();
         
@@ -26,12 +39,19 @@ public class BasicTodoUI implements ITodoUI {
         displayGoodbye();
     }
 
+    /**
+     * 환영 메시지를 표시합니다.
+     */
     public void displayWelcome() {
         System.out.println("================================");
         System.out.println("📝 Welcome to Todo Manager!");
         System.out.println("================================");
     }
 
+    /**
+     * 메인 메뉴를 표시합니다.
+     * 사용자가 선택할 수 있는 5가지 옵션을 보여줍니다.
+     */
     public void displayMenu() {
         System.out.println("\n📋 Please select a menu:");
         System.out.println("1. ➕ Add Todo");
@@ -42,6 +62,11 @@ public class BasicTodoUI implements ITodoUI {
         System.out.print("Choice: ");
     }
 
+    /**
+     * 사용자의 메뉴 선택을 처리합니다.
+     * @param choice 사용자가 선택한 메뉴 번호
+     * @return 프로그램을 종료해야 하면 true, 계속 실행하면 false
+     */
     private boolean handleChoice(String choice) {
         switch (choice) {
             case "1":
@@ -64,6 +89,10 @@ public class BasicTodoUI implements ITodoUI {
         return false;
     }
 
+    /**
+     * 새로운 Todo를 추가하는 기능을 처리합니다.
+     * 사용자로부터 제목, 설명, 마감일을 입력받아 Todo를 생성합니다.
+     */
     public void handleAddTodo() {
         clearScreen();
         System.out.println("================================");
@@ -89,6 +118,10 @@ public class BasicTodoUI implements ITodoUI {
         scanner.nextLine();
     }
 
+    /**
+     * 모든 Todo 목록을 표시합니다.
+     * Todo가 없으면 안내 메시지를 표시합니다.
+     */
     public void handleDisplayTodos() {
         clearScreen();
         System.out.println("================================");
@@ -105,6 +138,10 @@ public class BasicTodoUI implements ITodoUI {
         scanner.nextLine();
     }
 
+    /**
+     * Todo의 완료 상태를 변경하는 기능을 처리합니다.
+     * 미완료 Todo를 완료로, 완료된 Todo를 미완료로 변경할 수 있습니다.
+     */
     public void handleToggleTodo() {
         clearScreen();
         System.out.println("================================");
@@ -139,6 +176,10 @@ public class BasicTodoUI implements ITodoUI {
         }
     }
     
+    /**
+     * 미완료 Todo를 완료 상태로 변경하는 기능을 처리합니다.
+     * 미완료 Todo 목록을 표시하고 사용자가 선택한 Todo를 완료 상태로 변경합니다.
+     */
     private void handleIncompleteToggle() {
         clearScreen();
         System.out.println("================================");
@@ -180,6 +221,10 @@ public class BasicTodoUI implements ITodoUI {
         scanner.nextLine();
     }
     
+    /**
+     * 완료된 Todo를 미완료 상태로 변경하는 기능을 처리합니다.
+     * 완료된 Todo 목록을 표시하고 사용자가 선택한 Todo를 미완료 상태로 변경합니다.
+     */
     private void handleCompletedToggle() {
         clearScreen();
         System.out.println("================================");
@@ -221,6 +266,10 @@ public class BasicTodoUI implements ITodoUI {
         scanner.nextLine();
     }
 
+    /**
+     * Todo를 삭제하는 기능을 처리합니다.
+     * 전체 Todo 목록을 표시하고 사용자가 선택한 Todo를 삭제합니다.
+     */
     private void handleDeleteTodo() {
         clearScreen();
         System.out.println("================================");
@@ -253,6 +302,9 @@ public class BasicTodoUI implements ITodoUI {
         scanner.nextLine();
     }
 
+    /**
+     * 종료 메시지를 표시합니다.
+     */
     public void displayGoodbye() {
         clearScreen();
         System.out.println("================================");
@@ -260,6 +312,10 @@ public class BasicTodoUI implements ITodoUI {
         System.out.println("================================");
     }
     
+    /**
+     * 콘솔 화면을 지웁니다.
+     * ANSI 이스케이프 시퀀스를 사용하여 화면을 초기화합니다.
+     */
     private void clearScreen() {
         System.out.print("\033[H\033[2J");
         System.out.flush();

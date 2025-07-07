@@ -4,19 +4,30 @@ import todo.domain.Todo;
 import java.util.*;
 import java.time.LocalDate;
 
+/**
+ * 고급 Todo UI 구현 클래스
+ * 화려한 디자인과 색상을 사용하여 시각적으로 향상된 사용자 인터페이스를 제공합니다.
+ * ANSI 이스케이프 코드를 사용하여 터미널에 색상과 스타일을 적용합니다.
+ */
 public class FancyTodoUI implements ITodoUI {
     private Scanner scanner;
-    private static final String RESET = "\033[0m";
-    private static final String BOLD = "\033[1m";
-    private static final String CYAN = "\033[96m";
-    private static final String PURPLE = "\033[95m";
-    private static final String GREEN = "\033[92m";
-    private static final String YELLOW = "\033[93m";
-    private static final String RED = "\033[91m";
-    private static final String BLUE = "\033[94m";
     
-    private static final int DEFAULT_WIDTH = 80;
+    // ANSI 색상 코드 상수들
+    private static final String RESET = "\033[0m";    // 색상 초기화
+    private static final String BOLD = "\033[1m";     // 굵은 글씨
+    private static final String CYAN = "\033[96m";    // 청록색
+    private static final String PURPLE = "\033[95m";  // 보라색
+    private static final String GREEN = "\033[92m";   // 초록색
+    private static final String YELLOW = "\033[93m";  // 노란색
+    private static final String RED = "\033[91m";     // 빨간색
+    private static final String BLUE = "\033[94m";    // 파란색
+    
+    private static final int DEFAULT_WIDTH = 80;      // 기본 터미널 너비
 
+    /**
+     * FancyTodoUI 생성자
+     * Scanner 객체를 초기화하여 사용자 입력을 받을 준비를 합니다.
+     */
     public FancyTodoUI() {
         this.scanner = new Scanner(System.in);
     }
