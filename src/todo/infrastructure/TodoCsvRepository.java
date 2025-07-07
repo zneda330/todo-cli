@@ -1,10 +1,13 @@
+package todo.infrastructure;
+import todo.domain.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDate;
 
-// Use TodoFilter (in default package) to specify which todos to load
+// Use TodoFilter to specify which todos to load
 
 /**
  * Simple repository that saves and loads todos using a CSV file.
@@ -46,16 +49,23 @@ public class TodoCsvRepository implements TodoRepository {
                     String description = unquote(parts[1]);
                     boolean completed = Boolean.parseBoolean(parts[2]);
                     Map<String, String> metadata = new HashMap<>();
+                    LocalDate dueDate = null;
                     if (parts.length == 4) {
                         for (String entry : parts[3].split(";")) {
                             if (entry.isEmpty()) continue;
                             String[] kv = entry.split("=", 2);
                             if (kv.length == 2) {
-                                metadata.put(kv[0], kv[1]);
+                                if ("due".equals(kv[0])) {
+                                    try {
+                                        dueDate = LocalDate.parse(kv[1]);
+                                    } catch (Exception ignored) {}
+                                } else {
+                                    metadata.put(kv[0], kv[1]);
+                                }
                             }
                         }
                     }
-                    Todo todo = new Todo(title, description, metadata);
+                    Todo todo = new Todo(title, description, dueDate, metadata);
                     todo.setCompleted(completed);
                     if (filter == TodoFilter.ALL
                             || (filter == TodoFilter.COMPLETED && todo.isCompleted())
@@ -92,6 +102,9 @@ public class TodoCsvRepository implements TodoRepository {
         try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
             for (Todo todo : todos) {
                 StringBuilder metadata = new StringBuilder();
+                if (todo.getDueDate() != null) {
+                    metadata.append("due=").append(todo.getDueDate());
+                }
                 for (Map.Entry<String, String> e : todo.getMetadata().entrySet()) {
                     if (metadata.length() > 0) metadata.append(';');
                     metadata.append(e.getKey()).append('=').append(e.getValue());
